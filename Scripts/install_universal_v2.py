@@ -115,14 +115,11 @@ def install_aces(blender_datafiles_path, aces_path):
 
 # Основной сценарий
 def main():
-    ACES_VERSIONS = {
-        "1": "1.2",
-        "2": "1.3 Pro",
-        "3": "1.3 Pro Modified"
-    }
+
+    ACES_VERSIONS = json.load(open(Path(__file__).parent / 'aces_versions.json'))
 
     try:
-        aces_version = ACES_VERSIONS[get_user_input("Какую версию ACES установить: \n1. 1.2 \n2. 1.3 Pro \n3. 1.3 Pro Modified", ["1", "2", "3"])]
+        aces_version = ACES_VERSIONS[get_user_input("Версии ACES: \n1. 1.3 Pro \n2. PixelManager (Recommended) \nКакую версию ACES установить", ["1", "2"])]
         blender_version = get_user_input("Укажите версию Blender (например, 2.8, 3.6, 4.4)")
 
         blender_path = find_blender_paths(blender_version)
@@ -136,7 +133,7 @@ def main():
             print(f"Папка {blender_datafiles_path} не существует. Проверьте путь.")
             return
 
-        aces_base_path = Path(__file__).parent.parent / f"ACES {aces_version}"
+        aces_base_path = Path(__file__).parent.parent / aces_version
 
         create_backup(blender_datafiles_path, blender_version)
         install_aces(blender_datafiles_path, aces_base_path)
