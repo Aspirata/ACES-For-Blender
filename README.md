@@ -2,7 +2,8 @@
 I made an installation and uninstallation script for Blender ACES
 ## About ACES:
 ACES is a color management system that is used in the film industry. It is a set of tools and standards that help to ensure that the colors in a film are consistent and look natural.
-In a nutshell, it's a cool thing.
+
+In a nutshell, it's a cool thing :)
 
 ## About ACES in this installer:
  - 1.3 Pro
