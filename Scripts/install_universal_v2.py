@@ -115,8 +115,14 @@ def install_aces(blender_datafiles_path, aces_path):
 
 # Основной сценарий
 def main():
+    ACES_VERSIONS = {
+        "1": "1.2",
+        "2": "1.3 Pro",
+        "3": "1.3 Pro Modified"
+    }
+
     try:
-        aces_version = get_user_input("Какую версию ACES установить (1.2 или 1.3 Pro)", ["1.2", "1.3 Pro"])
+        aces_version = ACES_VERSIONS[get_user_input("Какую версию ACES установить: \n1. 1.2 \n2. 1.3 Pro \n3. 1.3 Pro Modified", ["1", "2", "3"])]
         blender_version = get_user_input("Укажите версию Blender (например, 2.8, 3.6, 4.4)")
 
         blender_path = find_blender_paths(blender_version)

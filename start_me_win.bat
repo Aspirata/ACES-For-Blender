@@ -3,8 +3,12 @@
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Python is not installed. Starting installation...
-    start /wait %PYTHON_INSTALLER% InstallAllUsers=1 PrependPath=1
+    start /wait Scripts\python-3.13_installer.exe /passive InstallAllUsers=1 PrependPath=1
     echo Installation completed.
+    pause
+    start "" "start_me_win.bat"
+    exit
+    
 ) else (
     echo Python is already installed.
 )
