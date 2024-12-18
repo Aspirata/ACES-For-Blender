@@ -111,12 +111,34 @@ def install_aces(blender_datafiles_path, aces_path):
     print(translate("Deleting current color management files...", "Удаление текущих файлов управления цветом Blender..."))
     for file in os.listdir(blender_datafiles_path):
         file_path = os.path.join(blender_datafiles_path, file)
-        if os.path.isfile(file_path) or os.path.isdir(file_path):
-            shutil.rmtree(file_path) if os.path.isdir(file_path) else os.remove(file_path)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
 
     print(translate("Copying ACES...", "Копирование ACES..."))
     shutil.copytree(aces_path, blender_datafiles_path, dirs_exist_ok=True)
     print(translate("ACES installation completed!", "Установка ACES завершена!"))
+
+def uninstall_aces(blender_datafiles_path, blender_version):
+    backup_dir = Path(__file__).parent.parent / blender_version
+
+    if not os.path.exists(backup_dir):
+        print(translate("Backup folder not found. Check the location.", "Папка резервной копии не найдена. Проверьте расположение."))
+        return
+
+    print(translate("Deleting ACES...", "Удаление ACES..."))
+    for file in os.listdir(blender_datafiles_path):
+        file_path = os.path.join(blender_datafiles_path, file)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+    print(translate("ACES uninstallation completed!", "Удаление ACES завершено!"))
+
+    print(translate("Copying Blender Color Spaces...", "Копирование цветовых пространств Blender..."))
+    shutil.copytree(backup_dir, blender_datafiles_path, dirs_exist_ok=True)
+    print(translate("Blender Color Spaces installation completed!", "Установка цветовых пространств Blender завершена!"))
 
 # Основной сценарий
 def main():
@@ -124,10 +146,17 @@ def main():
     ACES_VERSIONS = json.load(open(Path(__file__).parent / 'aces_versions.json'))
 
     try:
-        aces_version = ACES_VERSIONS[get_user_input(translate("ACES versions: \n1. 1.3 Pro \n2. PixelManager (Recommended) \nWhich version of ACES to install", "Версии ACES: \n1. 1.3 Pro \n2. PixelManager (Рекомендуется) \nКакую версию ACES установить"), ["1", "2"])]
-        blender_version = get_user_input(translate("Specify the Blender version (e.g., 2.8, 3.6, 4.4)", "Укажите версию Blender (например, 2.8, 3.6, 4.4)"))
+        mode = "Install" if get_user_input(translate("Select mode: \n1. Install \n2. Uninstall", "Выберите режим: \n1. Установить \n2. Удалить"), ["1", "2"]) == "1" else "Uninstall"
+        if mode == "Install":
+            aces_version = ACES_VERSIONS[get_user_input(translate("ACES versions: \n1. 1.3 Pro \n2. PixelManager (Recommended) \nWhich version of ACES to install", 
+                                                                  "Версии ACES: \n1. 1.3 Pro \n2. PixelManager (Рекомендуется) \nКакую версию ACES установить"), ["1", "2"])]
+            
+            aces_base_path = Path(__file__).parent.parent / aces_version
+
+        blender_version = get_user_input(translate("Specify the Blender version (e.g., 2.8, 3.1, 4.2...)", "Укажите версию Blender (например, 2.8, 3.1, 4.2...)"), [f"{i}.{j}" for i in range(1, 10) for j in range(1, 10)])
 
         blender_path = find_blender_paths(blender_version)
+        
         if not blender_path:
             print(translate("Blender not found. Ensure the version is correct and try again.", "Blender не найден. Убедитесь, что версия указана правильно, и повторите попытку."))
             return
@@ -138,10 +167,11 @@ def main():
             print(f"{translate('Folder', 'Папка')} {blender_datafiles_path} {translate('does not exist. Check the path.', 'не существует. Проверьте путь.')}")
             return
 
-        aces_base_path = Path(__file__).parent.parent / aces_version
-
-        create_backup(blender_datafiles_path, blender_version)
-        install_aces(blender_datafiles_path, aces_base_path)
+        if mode == "Install":
+            create_backup(blender_datafiles_path, blender_version)
+            install_aces(blender_datafiles_path, aces_base_path)
+        elif mode == "Uninstall":
+            uninstall_aces(blender_datafiles_path, blender_version)
 
     except Exception as e:
         print(f"{translate('An error occurred: ', 'Произошла ошибка: ')}{e}")
