@@ -72,6 +72,7 @@ class BlenderACESInstaller(QMainWindow):
 
         self.mode_combo = QComboBox()
         self.mode_combo.addItems([translate("Installation", "Установка"), translate("Uninstallation", "Удаление")])
+        self.mode_combo.currentTextChanged.connect(self.disable_aces_version_combo)
         self.layout.addWidget(self.mode_combo)
 
         # Blender Version Selection
@@ -99,15 +100,23 @@ class BlenderACESInstaller(QMainWindow):
         self.execute_button = QPushButton(translate("Execute", "Выполнить"))
         self.execute_button.clicked.connect(self.execute)
         self.layout.addWidget(self.execute_button)
+    
+    def disable_aces_version_combo(self):
+        if self.mode_combo.currentText() == translate("Uninstallation", "Удаление"):
+            self.aces_combo.setEnabled(False)
+        else:
+            self.aces_combo.setEnabled(True)
 
     def specify_custom_path(self):
-        custom_path = os.path.normpath(QFileDialog.getExistingDirectory(self, translate("Select Blender Folder", "Выберите папку Blender")))
+        while True:
+            custom_path = os.path.normpath(QFileDialog.getExistingDirectory(self, translate("Select Blender Folder", "Выберите папку Blender")))
 
-        if os.path.exists(custom_path):
-            self.version_combo.addItem(f"{custom_path} - Manual")
-        else:
-            QMessageBox.warning(self, translate("Error", "Ошибка"),
-                                    translate("The specified path does not exist.", "Указанный путь не существует."))
+            if os.path.exists(custom_path):
+                self.version_combo.addItem(f"{custom_path} - Manual")
+                break
+            else:
+                QMessageBox.warning(self, translate("Error", "Ошибка"),
+                                        translate("The specified path does not exist.", "Указанный путь не существует."))
 
     def populate_blender_versions(self):
         blender_versions = find_blender_versions()
@@ -127,7 +136,7 @@ class BlenderACESInstaller(QMainWindow):
         if not selected_version or " - " not in selected_version:
             QMessageBox.critical(self, translate("Error", "Ошибка"),
                                     translate("Invalid Blender version selected.", "Выбрана недействительная версия Blender."))
-            return
+            return "Error"
 
         aces_version = self.aces_combo.currentText()
 
@@ -138,10 +147,27 @@ class BlenderACESInstaller(QMainWindow):
         aces_base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), aces_version)
 
         if mode == translate("Installation", "Установка"):
-            self.create_backup(blender_datafiles_path, backup_dir)
-            self.install_aces(blender_datafiles_path, aces_base_path)
-        elif mode == translate("Uninstallation", "Удаление"):
-            self.uninstall_aces(blender_datafiles_path, backup_dir)
+            try:
+                backup_result = self.create_backup(blender_datafiles_path, backup_dir)
+                if "Error" in backup_result:
+                    QMessageBox.critical(self, translate("Error", "Ошибка"), backup_result[1])
+                    return
+
+                aces_install_result = self.install_aces(blender_datafiles_path, aces_base_path)
+                if "Error" in aces_install_result:
+                    QMessageBox.critical(self, translate("Error", "Ошибка"), aces_install_result[1])
+                    return
+
+            except Exception as e:
+                QMessageBox.critical(self, translate("Error", "Ошибка"), str(e))
+        else:
+            try:
+                aces_uninstall_result = self.uninstall_aces(blender_datafiles_path, backup_dir)
+                if "Error" in aces_uninstall_result:
+                    QMessageBox.critical(self, translate("Error", "Ошибка"), aces_uninstall_result[1])
+                    return
+            except Exception as e:
+                QMessageBox.critical(self, translate("Error", "Ошибка"), str(e))
 
         QMessageBox.information(self, translate("Success", "Успех"),
                                 translate("Operation completed successfully.", "Операция успешно завершена."))
@@ -153,7 +179,9 @@ class BlenderACESInstaller(QMainWindow):
 
     def install_aces(self, blender_datafiles_path, aces_path):
         if not os.path.exists(aces_path):
-            raise FileNotFoundError(translate("ACES folder not found.", "Папка ACES не найдена."))
+            QMessageBox.critical(self, translate("Error", "Ошибка"),
+                                    translate("ACES folder not found.", "Папка ACES не найдена."))
+            return ("Error", translate("ACES folder not found.", "Папка ACES не найдена."))
 
         for file in os.listdir(blender_datafiles_path):
             file_path = os.path.join(blender_datafiles_path, file)
@@ -167,7 +195,9 @@ class BlenderACESInstaller(QMainWindow):
     def uninstall_aces(self, blender_datafiles_path, backup_dir):
 
         if not os.path.exists(backup_dir):
-            raise FileNotFoundError(translate("Backup folder not found.", "Папка резервной копии не найдена."))
+            QMessageBox.warning(self, translate("Error", "Ошибка"),
+                                    translate("Backup folder not found.", "Папка резервной копии не найдена.") + "\n" + translate("Install ACES first.", "Сначала установите ACES."))
+            return ("Error", translate("Backup folder not found.", "Папка резервной копии не найдена.") + "\n" + translate("Install ACES first.", "Сначала установите ACES."))
 
         for file in os.listdir(blender_datafiles_path):
             file_path = os.path.join(blender_datafiles_path, file)
