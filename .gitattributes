@@ -3,3 +3,5 @@
 *.ocio linguist-vendored
 *.spi1d linguist-vendored
 *.spi3d linguist-vendored
+*.md linguist-vendored
+*.roff linguist-vendored

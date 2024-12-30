@@ -5,7 +5,7 @@ I made an installation and uninstallation script for Blender ACES
  - Download the latest [release](https://github.com/Aspirata/ACES-For-Blender/releases)
  - Run the start_me_win.bat or start_me_linux.sh
  - Select the mode (install or uninstall)
- - Select the blender instance folder
+ - Select the blender instance folder or specify the path to the blender colormanagement folder
  - When installing, select the ACES version (PixelManager or 1.3 Pro)
  - Enjoy!
 
