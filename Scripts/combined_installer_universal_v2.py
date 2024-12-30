@@ -24,19 +24,18 @@ def find_blender_versions():
 
     possible_paths = []
 
-    # Проверяем на всех дисках
-    print(f"{translate('Checking possible Blender paths on all drives...', 'Проверка возможных путей Blender на всех дисках...')}")
     for drive in [f"{chr(letter)}:/" for letter in range(65, 91) if os.path.exists(f"{chr(letter)}:/")]:
         for template in template_paths:
-            template = template.replace("/", "\\") if "nt" in os.name else template
+            template = template.replace("/", os.sep) if "nt" in os.name else template
             for i in range(2, 10):
                 for j in range(1, 10):
                     version = f"{i}.{j}"
                     if os.path.isabs(template):
-                        if os.path.exists(template.replace("<version>", version)):
-                            possible_paths.append((template.replace('<version>', version), 'Steam' if 'Steam' in template else 'Alternate'))
+                        path = os.path.normpath(template.replace("<version>", version))
+                        if os.path.exists(path):
+                            possible_paths.append((path, 'Steam' if 'Steam' in template else 'Alternate'))
                     else:
-                        path = os.path.join(drive, template.replace("<version>", version))
+                        path = os.path.normpath(os.path.join(drive, template.replace("<version>", version)))
                         if os.path.exists(path):
                             possible_paths.append((path, 'Steam' if 'Steam' in template else 'Alternate'))
 
@@ -44,23 +43,11 @@ def find_blender_versions():
     home_dir = str(Path.home())
     for template in template_paths:
         if template.startswith("/") or template.startswith("."):
-            path = os.path.join(home_dir, template.replace("<version>", version))
+            path = os.path.normpath(os.path.join(home_dir, template.replace("<version>", version)))
             if os.path.exists(path):
                 possible_paths.append((path, 'Steam' if 'Steam' in template else 'Alternate'))
 
     possible_paths = list(set(possible_paths))  # Убираем дубли
-
-    if not possible_paths:
-        print(translate('Blender not found. Please enter the path manually.', 'Blender не найден. Пожалуйста, введите путь вручную.'))
-        while True:
-            manual_path = input(translate("Enter the full path to the Blender folder: ", "Введите полный путь к папке Blender: "))
-            if os.path.exists(manual_path):
-                possible_paths.append((manual_path, 'Manual'))
-                if get_user_input(translate("Do you want to add this path to the list of Blender paths?", "Вы хотите добавить этот путь в список путей Blender?"), ["yes", "no"]) == "yes":
-                    add_to_json(manual_path)
-                break
-            else:
-                print(translate("The path does not exist. Please try again.", "Путь не существует. Попробуйте снова."))
 
     return possible_paths
 
@@ -99,7 +86,7 @@ class BlenderACESInstaller(QMainWindow):
         self.custom_path_button = QPushButton(translate("Specify Custom Path", "Указать свой путь"))
         self.layout.addWidget(self.custom_path_button)
         self.custom_path_button.clicked.connect(self.specify_custom_path)
-
+        
         # ACES Version Selection
         self.aces_label = QLabel(translate("Select ACES version:", "Выберите версию ACES:"))
         self.layout.addWidget(self.aces_label)
@@ -113,14 +100,14 @@ class BlenderACESInstaller(QMainWindow):
         self.execute_button.clicked.connect(self.execute)
         self.layout.addWidget(self.execute_button)
 
-        # Status Label
-        self.status_label = QLabel(translate("Status: Ready", "Статус: Готово"))
-        self.layout.addWidget(self.status_label)
-
     def specify_custom_path(self):
-        custom_path = QFileDialog.getExistingDirectory(self, translate("Select Blender Folder", "Выберите папку Blender"))
-        if custom_path:
+        custom_path = os.path.normpath(QFileDialog.getExistingDirectory(self, translate("Select Blender Folder", "Выберите папку Blender")))
+
+        if os.path.exists(custom_path):
             self.version_combo.addItem(f"{custom_path} - Manual")
+        else:
+            QMessageBox.warning(self, translate("Error", "Ошибка"),
+                                    translate("The specified path does not exist.", "Указанный путь не существует."))
 
     def populate_blender_versions(self):
         blender_versions = find_blender_versions()
@@ -134,34 +121,30 @@ class BlenderACESInstaller(QMainWindow):
             self.specify_custom_path()
 
     def execute(self):
-        try:
-            mode = self.mode_combo.currentText()
-            selected_version = self.version_combo.currentText()
+        mode = self.mode_combo.currentText()
+        selected_version = self.version_combo.currentText()
 
-            if not selected_version or " - " not in selected_version:
-                QMessageBox.critical(self, translate("Error", "Ошибка"),
-                                        translate("Invalid Blender version selected.", "Выбрана недействительная версия Blender."))
-                return
-
-            aces_version = self.aces_combo.currentText()
-
-            blender_datafiles_path = selected_version.split(" - ")[0]
-            backup_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), blender_datafiles_path.split(os.sep)[-3])
-            aces_base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), aces_version)
-
-            if mode == translate("Installation", "Установка"):
-                self.create_backup(blender_datafiles_path, backup_dir)
-                self.install_aces(blender_datafiles_path, aces_base_path)
-            elif mode == translate("Uninstallation", "Удаление"):
-                self.uninstall_aces(blender_datafiles_path, backup_dir)
-
-            QMessageBox.information(self, translate("Success", "Успех"),
-                                        translate("Operation completed successfully.", "Операция успешно завершена."))
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        if not selected_version or " - " not in selected_version:
             QMessageBox.critical(self, translate("Error", "Ошибка"),
-                                 translate(f"An error occurred: {e}", f"Произошла ошибка: {e}"))
-            input("Press Enter to exit...")
+                                    translate("Invalid Blender version selected.", "Выбрана недействительная версия Blender."))
+            return
+
+        aces_version = self.aces_combo.currentText()
+
+        blender_datafiles_path = selected_version.split(" - ")[0]
+        path_parts = blender_datafiles_path.split(os.sep)
+        backup_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path_parts[-3])
+
+        aces_base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), aces_version)
+
+        if mode == translate("Installation", "Установка"):
+            self.create_backup(blender_datafiles_path, backup_dir)
+            self.install_aces(blender_datafiles_path, aces_base_path)
+        elif mode == translate("Uninstallation", "Удаление"):
+            self.uninstall_aces(blender_datafiles_path, backup_dir)
+
+        QMessageBox.information(self, translate("Success", "Успех"),
+                                translate("Operation completed successfully.", "Операция успешно завершена."))
 
     def create_backup(self, blender_datafiles_path, backup_dir):
         if not os.path.exists(backup_dir):
