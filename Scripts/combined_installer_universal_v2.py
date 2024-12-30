@@ -109,7 +109,15 @@ class BlenderACESInstaller(QMainWindow):
 
     def specify_custom_path(self):
         while True:
-            custom_path = os.path.normpath(QFileDialog.getExistingDirectory(self, translate("Select Blender Folder", "Выберите папку Blender")))
+            custom_path = os.path.normpath(QFileDialog.getExistingDirectory(self, translate("Select Blender Colormanagement Folder, for example C:/downloads/Blender 4.3/4.3/datafiles/colormanagement", 
+                                                                                            "Выберите папку с colormanagement для Blender, например C:/downloads/Blender 4.3/4.3/datafiles/colormanagement")))
+            
+            if custom_path == "" or custom_path == ".":
+                break
+            elif "colormanagement" not in custom_path:
+                QMessageBox.warning(self, translate("Error", "Ошибка"),
+                                        translate("The specified path does not contain 'colormanagement' folder.", "Указанный путь не содержит папку 'colormanagement'."))
+                continue
 
             if os.path.exists(custom_path):
                 self.version_combo.addItem(f"{custom_path} - Manual")
