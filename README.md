@@ -14,7 +14,7 @@ I made an installation and uninstallation script for Blender ACES
 ## About ACES:
 ACES is a color management system that is used in the film industry. It is a set of tools and standards that help to ensure that the colors in a film are consistent and look natural.
 
-In a nutshell, it's a cool thing :)
+In a nutshell, it's a cool thing :D
 
 ## About ACES in this installer:
  - 1.3 Pro
@@ -30,4 +30,4 @@ P.S I don't remember where I downloaded the original ACES 1.3 Pro files, so I ca
  - Python 3.10+ (It may work on older versions, but idk lol fr)
  - PyQt6
 
-Don't worry, all the dependencies will be installed automatically :3
+Don't worry, all the dependencies will be installed automatically :)
