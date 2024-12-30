@@ -147,27 +147,26 @@ class BlenderACESInstaller(QMainWindow):
         aces_base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), aces_version)
 
         if mode == translate("Installation", "Установка"):
-            try:
-                backup_result = self.create_backup(blender_datafiles_path, backup_dir)
-                if "Error" in backup_result:
-                    QMessageBox.critical(self, translate("Error", "Ошибка"), backup_result[1])
-                    return
+            backup_result = self.create_backup(blender_datafiles_path, backup_dir)
+            if "Error" in backup_result:
+                QMessageBox.critical(self, translate("Error", "Ошибка"), backup_result[1])
+                return
+            else:
+                print(backup_result[1])
 
-                aces_install_result = self.install_aces(blender_datafiles_path, aces_base_path)
-                if "Error" in aces_install_result:
-                    QMessageBox.critical(self, translate("Error", "Ошибка"), aces_install_result[1])
-                    return
-
-            except Exception as e:
-                QMessageBox.critical(self, translate("Error", "Ошибка"), str(e))
+            aces_install_result = self.install_aces(blender_datafiles_path, aces_base_path)
+            if "Error" in aces_install_result:
+                QMessageBox.critical(self, translate("Error", "Ошибка"), aces_install_result[1])
+                return
+            else:
+                print(aces_install_result[1])
         else:
-            try:
-                aces_uninstall_result = self.uninstall_aces(blender_datafiles_path, backup_dir)
-                if "Error" in aces_uninstall_result:
-                    QMessageBox.critical(self, translate("Error", "Ошибка"), aces_uninstall_result[1])
-                    return
-            except Exception as e:
-                QMessageBox.critical(self, translate("Error", "Ошибка"), str(e))
+            aces_uninstall_result = self.uninstall_aces(blender_datafiles_path, backup_dir)
+            if "Error" in aces_uninstall_result:
+                QMessageBox.warning(self, translate("Error", "Ошибка"), aces_uninstall_result[1])
+                return
+            else:
+                print(aces_uninstall_result[1])
 
         QMessageBox.information(self, translate("Success", "Успех"),
                                 translate("Operation completed successfully.", "Операция успешно завершена."))
@@ -176,11 +175,12 @@ class BlenderACESInstaller(QMainWindow):
         if not os.path.exists(backup_dir):
             os.makedirs(backup_dir, exist_ok=True)
             shutil.copytree(blender_datafiles_path, backup_dir, dirs_exist_ok=True)
+            return ("Success", translate("Backup created successfully.", "Резервная копия успешно создана."))
+        else:
+            return ("Success", translate("Backup folder already exists.", "Папка резервной копии уже существует."))
 
     def install_aces(self, blender_datafiles_path, aces_path):
         if not os.path.exists(aces_path):
-            QMessageBox.critical(self, translate("Error", "Ошибка"),
-                                    translate("ACES folder not found.", "Папка ACES не найдена."))
             return ("Error", translate("ACES folder not found.", "Папка ACES не найдена."))
 
         for file in os.listdir(blender_datafiles_path):
@@ -191,14 +191,12 @@ class BlenderACESInstaller(QMainWindow):
                 shutil.rmtree(file_path)
 
         shutil.copytree(aces_path, blender_datafiles_path, dirs_exist_ok=True)
+        return ("Success", translate("ACES installed successfully.", "ACES успешно установлен."))
 
     def uninstall_aces(self, blender_datafiles_path, backup_dir):
-
         if not os.path.exists(backup_dir):
-            QMessageBox.warning(self, translate("Error", "Ошибка"),
-                                    translate("Backup folder not found.", "Папка резервной копии не найдена.") + "\n" + translate("Install ACES first.", "Сначала установите ACES."))
             return ("Error", translate("Backup folder not found.", "Папка резервной копии не найдена.") + "\n" + translate("Install ACES first.", "Сначала установите ACES."))
-
+            
         for file in os.listdir(blender_datafiles_path):
             file_path = os.path.join(blender_datafiles_path, file)
             if os.path.isfile(file_path):
@@ -207,6 +205,8 @@ class BlenderACESInstaller(QMainWindow):
                 shutil.rmtree(file_path)
 
         shutil.copytree(backup_dir, blender_datafiles_path, dirs_exist_ok=True)
+
+        return ("Success", translate("ACES uninstalled successfully.", "ACES успешно удалён."))
 
 if __name__ == "__main__":
     import sys
