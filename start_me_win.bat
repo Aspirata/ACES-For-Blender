@@ -13,6 +13,8 @@ if %errorlevel% neq 0 (
     echo Python is already installed.
 )
 
+pip install pyqt6
+
 echo Running combined_installer_universal_v2.py...
 python Scripts/combined_installer_universal_v2.py
 pause

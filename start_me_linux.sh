@@ -8,6 +8,7 @@ else
     echo "Python is already installed."
 fi
 
+pip install pyqt6
 echo "Running combined_installer_universal_v2.py..."
 python3 Scripts/combined_installer_universal_v2.py
 pause
