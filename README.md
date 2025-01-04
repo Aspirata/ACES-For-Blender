@@ -3,7 +3,7 @@ I made an installation and uninstallation script for Blender ACES
 
 ## How to use:
  - Download the latest [release](https://github.com/Aspirata/ACES-For-Blender/releases)
- - Run the start_me_win.bat or start_me_linux.sh
+ - Run the ACES Installer.exe
  - Select the mode (install or uninstall)
  - Select the blender instance folder or specify the path to the blender colormanagement folder
  - When installing, select the ACES version (PixelManager or 1.3 Pro)
@@ -29,5 +29,3 @@ P.S I don't remember where I downloaded the original ACES 1.3 Pro files, so I ca
 ## Dependencies:
  - Python 3.10+ (It may work on older versions, but idk lol fr)
  - PyQt6
-
-Don't worry, all the dependencies will be installed automatically :)
