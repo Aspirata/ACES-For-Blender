@@ -27,5 +27,5 @@ Btw this install script can be used for any color space, but I only use ACES, so
 P.S I don't remember where I downloaded the original ACES 1.3 Pro files, so I can't provide a link.
 
 ## Dependencies:
- - Python 3.10+ (It may work on older versions, but idk lol fr)
- - PyQt6
+ - Python 3.12
+ - PySide 6.9
