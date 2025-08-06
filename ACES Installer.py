@@ -97,7 +97,7 @@ class BlenderACESInstaller(QMainWindow):
         self.layout.addWidget(self.aces_label)
 
         self.aces_combo = QComboBox()
-        self.aces_combo.addItems(["PixelManager", "1.3 Pro"])
+        self.aces_combo.addItems(["PixelManager", "ACES 1.3 Pro"])
         self.layout.addWidget(self.aces_combo)
 
         # Execute Button
