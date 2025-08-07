@@ -1,10 +1,6 @@
 @echo off
-pip show pyinstaller >nul 2>&1
-if errorlevel 1 (
-    pip install pyinstaller
-)
 
-pyinstaller --onefile --noconsole --strip "ACES Installer.py"
+pyinstaller --onefile --noconsole --add-data "ACES;ACES" "blender_aces_manager.py"
 
-if exist "ACES Installer.exe" del "ACES Installer.exe"
-move "dist\ACES Installer.exe" .\
+if exist "blender_aces_manager.exe" del "blender_aces_manager.exe"
+move "dist\blender_aces_manager.exe" .\
