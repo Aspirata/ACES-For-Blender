@@ -50,11 +50,22 @@ def create_colormanagement_backup(path: str) -> str:
         print(str(e))
         return str(e)
 
-def install_aces(blender_version_path: str, aces_version_path: str):
+def install_aces(blender_version_path: str, aces_version_path: str) -> str:
     try:
         window.start_progress_animation("Установка ACES")
         shutil.copytree(aces_version_path, blender_version_path, dirs_exist_ok=True)
         window.change_progress_status("ACES установлен")
+        return "Success"
+    except Exception as e:
+        print(str(e))
+        return str(e)
+
+def uninstall_aces(blender_version_path: str) -> str:
+    try:
+        window.start_progress_animation("Удаление ACES")
+        shutil.rmtree(blender_version_path)
+        shutil.copytree(os.path.join(os.path.dirname(blender_version_path), "colormanagement_backup"), blender_version_path)
+        window.change_progress_status("ACES удален")
         return "Success"
     except Exception as e:
         print(str(e))
@@ -79,15 +90,28 @@ class MainWindow(QMainWindow):
             blender_versions_default_index = blender_versions.index(blender_versions[-1])
             self.ui.blender_versions_combobox.addItems(blender_versions)
             self.ui.blender_versions_combobox.setCurrentIndex(blender_versions_default_index)
-
-        self.ui.execute_button.clicked.connect(lambda: self.execute_aces(self.ui.blender_versions_combobox.currentText(), self.ui.aces_versions_combobox.currentText()))
+            
+        self.ui.blender_versions_browse_button.clicked.connect(self.blender_versions_browse)
 
         aces_versions = find_aces_versions()
         aces_versions_default_index = aces_versions.index(sorted(list(filter(lambda x: "pixelmanager" in x.lower(), aces_versions)))[-1])
         self.ui.aces_versions_combobox.addItems(aces_versions)
         self.ui.aces_versions_combobox.setCurrentIndex(aces_versions_default_index)
-        
-        self.ui.blender_versions_browse_button.clicked.connect(self.blender_versions_browse)
+
+        self.ui.install_button.clicked.connect(lambda: self.execute_install_aces(self.ui.blender_versions_combobox.currentText(), self.ui.aces_versions_combobox.currentText()))
+        self.ui.uninstall_button.clicked.connect(lambda: self.execute_uninstall_aces(self.ui.blender_versions_combobox.currentText()))
+        self.ui.blender_versions_combobox.currentTextChanged.connect(self.update_uninstall_button_state)
+        self.update_uninstall_button_state()
+
+    def update_uninstall_button_state(self) -> None:
+        current_path = self.ui.blender_versions_combobox.currentText()
+        colormanagement_backup_path = os.path.join(os.path.dirname(current_path), "colormanagement_backup")
+        if current_path and os.path.exists(colormanagement_backup_path):
+            self.ui.uninstall_button.setEnabled(True)
+            self.ui.uninstall_button.setToolTip("")
+        else:
+            self.ui.uninstall_button.setEnabled(False)
+            self.ui.uninstall_button.setToolTip("Бэкап colormanagement не найден. Необходимо сначала установить ACES для создания бэкапа.")
     
     def blender_versions_browse(self) -> str:
         colormanagement_path = QFileDialog.getExistingDirectory(self, "Выберите папку Blender Colormanagement")
@@ -109,7 +133,7 @@ class MainWindow(QMainWindow):
         self.ui.blender_versions_combobox.setCurrentText(colormanagement_path)
         return colormanagement_path
 
-    def execute_aces(self, blender_version_path: str, aces_version_path: str) -> str:
+    def execute_install_aces(self, blender_version_path: str, aces_version_path: str) -> str:
         aces_version_path = os.path.join(get_app_path(), "ACES", aces_version_path)
         create_colormanagement_backup_result = create_colormanagement_backup(blender_version_path)
         if create_colormanagement_backup_result:
@@ -126,6 +150,18 @@ class MainWindow(QMainWindow):
                 self,
                 "Ошибка",
                 f'Неудалось установить ACES: {install_aces_result}'
+            )
+            return "Fail"
+        
+        return "Success"
+    
+    def execute_uninstall_aces(self, blender_version_path: str) -> str:
+        uninstall_aces_result = uninstall_aces(blender_version_path)
+        if uninstall_aces_result:
+            QMessageBox.critical(
+                self,
+                "Ошибка",
+                f'Неудалось удалить ACES: {uninstall_aces_result}'
             )
             return "Fail"
         

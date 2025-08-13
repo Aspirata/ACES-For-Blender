@@ -1,4 +1,5 @@
 dist
 build
+__pycache__
 blender_aces_manager.spec
 blender_aces_manager.exe
