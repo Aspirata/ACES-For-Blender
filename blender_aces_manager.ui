@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Blender ACES Installer</string>
+   <string>Blender ACES Manager</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="enabled">

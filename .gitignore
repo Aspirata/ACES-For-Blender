@@ -1,5 +1,5 @@
-dist
-build
 __pycache__
-blender_aces_manager.spec
+blender_aces_manager.build
+blender_aces_manager.dist
+blender_aces_manager.onefile-build
 blender_aces_manager.exe

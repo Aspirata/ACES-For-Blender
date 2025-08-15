@@ -1,6 +1,13 @@
 @echo off
 
-pyinstaller --onefile --noconsole --add-data "ACES;ACES" "blender_aces_manager.py"
+python -m pip install -r requirements.txt
 
-if exist "blender_aces_manager.exe" del "blender_aces_manager.exe"
-move "dist\blender_aces_manager.exe" .\
+python -m nuitka ^
+  --standalone ^
+  --onefile ^
+  --enable-plugin=pyside6 ^
+  --include-data-dir=ACES=ACES ^
+  --windows-console-mode=disable ^
+  blender_aces_manager.py
+
+pause
