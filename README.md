@@ -1,44 +1,42 @@
+# [Readme EN](README_en.md)
+
 # Blender ACES Manager
 
-Blender ACES Manager is a lightweight tool designed to simplify the installation and uninstallation of the ACES (Academy Color Encoding System) color management system for any Blender version. When installing ACES, the tool automatically creates a backup of Blender's original `colormanagement` folder to ensure safe and reversible changes.
+Blender ACES Manager — это простая программа для управления ACES в Blender.
 
-## About ACES
+## Что такое ACES
 
-The Academy Color Encoding System (ACES) is a standardized color management framework widely used in the film and visual effects industries. ACES ensures consistent, accurate, and natural-looking colors across different devices and workflows, making it an essential tool for professional-grade color grading and rendering.
+**ACES (Academy Color Encoding System)** — это стандартизированная система управления цветом, широко используемая в киноиндустрии и индустрии визуальных эффектов. ACES обеспечивает единообразные, точные и естественные цвета на разных устройствах и в различных рабочих процессах, что делает её незаменимым инструментом для профессиональной цветокоррекции и рендеринга.
 
-**In plain terms**: ACES helps make colors in Blender look consistent and professional, like in big-budget movies! 🎥
+**Проще говоря**: ACES делает картинку красивее, как в голливудских фильмах.
 
-## Supported ACES Versions
-
-This tool supports the following ACES configurations:
+## Предустановленные версии ACES
 
 - **ACES 1.3 Pro**  
-  The ACES 1.3 version, compatible with Blender's 4.1 default color management system.  
-  *Note: The source for ACES 1.3 Pro is not documented, so no download link is provided.*
+  Версия ACES 1.3, совместимая со стандартной системой управления цветом Blender 4.1.  
+  *Примечание: источник ACES 1.3 Pro не задокументирован, поэтому ссылка на загрузку отсутствует.*
 
-- **[PixelManager v1.1.4](https://github.com/Joegenco/PixelManager/releases/tag/v.1.1.4)**  
-  A collection of color management files, including ACES 1.3 and Blender 4.4's default color management system.
+- **[PixelManager v2.0](https://github.com/Joegenco/PixelManager/releases/tag/v.2.0-RC4)**  
+  Обновлённый набор файлов управления цветом с поддержкой ACES 1.3, ACES 2.0 и стандартной системы управления цветом Blender 4.4.
 
-- **[PixelManager v2.0](https://github.com/Joegenco/PixelManager/releases/tag/v.2.0-RC3)**  
-  An updated set of color management files, supporting ACES 1.3, ACES 2.0, and Blender 4.4's default color management system.
+Вы можете собрать программу с любым ACES или другим цветовым менеджером — достаточно лишь поместить их в папку **ACES**.
 
-## Features
+## Возможности
 
-- **Easy Installation/Uninstallation**: Seamlessly install or remove ACES configurations in Blender with a single click.
-- **Automatic Backups**: Safeguards Blender’s original `colormanagement` folder before applying changes.
-- **Broad Compatibility**: Works with any Blender version, ensuring flexibility for users.
-- **Multiple ACES Options**: Choose between ACES 1.3 Pro, PixelManager v1.1.4, or PixelManager v2.0.
+- **Простая установка и удаление ACES**
+- **Автоматическое резервное копирование оригинальной системы управления цветом Blender**
+- **Совместимость с актуальными версиями Blender (3.6+)**
 
-## Requirements to Build
+## Зависимости для сборки
 
-To build the Blender ACES Manager, you need the following:
+- **Python**: версия 3.8 или выше (рекомендуется 3.12)  
+- **PySide**: версия 6.9.1  
+- **Nuitka**: версия 2.7.12  
+- **ordered-set**: версия 4.1.0  
+- **zstandard**: версия 0.23.0  
 
-- **Python**: Version 3.8 or higher (3.12 recommended)
-- **PySide**: Version 6.9.1
-- **PyInstaller**: Version 6.15.0
+*P.S.*: Скрипт `build.cmd` установит все зависимости, кроме Python.
 
-*Note*: The `build.cmd` script handles the installation of all dependencies except Python, which must be installed manually.
+## Лицензия
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Проект распространяется под лицензией MIT. Подробнее можно узнать [здесь](LICENSE).  
